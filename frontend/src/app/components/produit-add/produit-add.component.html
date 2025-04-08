@@ -1,0 +1,82 @@
+<div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl my-8">
+  <div class="p-8">
+    <div class="uppercase tracking-wide text-sm text-indigo-600 font-semibold mb-1">Formulaire de Produit</div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Ajouter un Produit</h2>
+    
+    <form (ngSubmit)="saveProduit()" class="space-y-6">
+      <div class="space-y-2">
+        <label for="name" class="block text-sm font-medium text-gray-700">Nom</label>
+        <input 
+          type="text" 
+          id="name" 
+          [(ngModel)]="produit.name" 
+          name="name" 
+          required
+          class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+        >
+      </div>
+      <div class="space-y-2">
+        <label for="quantity" class="block text-sm font-medium text-gray-700">Quantité</label>
+        <input 
+          type="number" 
+          id="quantity" 
+          [(ngModel)]="produit.quantity" 
+          name="quantity" 
+          required
+          class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+      </div>
+
+      <!-- Sélection du dépôt -->
+<div class="space-y-2">
+  <label for="depot" class="block text-sm font-medium text-gray-700">Dépôt</label>
+  <select
+    id="depot"
+    [(ngModel)]="produit.depot"
+    name="depot"
+    required
+    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+  >
+    <option value="" disabled selected>Choisir un dépôt</option>
+    <option *ngFor="let d of depots" [ngValue]="d">
+      {{ d.name }}
+    </option>
+  </select>
+</div>
+
+      
+      <!-- <div class="space-y-2">
+        <label for="prix" class="block text-sm font-medium text-gray-700">Prix</label>
+        <div class="mt-1 relative rounded-md shadow-sm">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="text-gray-500 sm:text-sm">€</span>
+          </div>
+          <input 
+            type="number" 
+            step="0.01" 
+            id="prix" 
+            [(ngModel)]="produit.prix" 
+            name="prix" 
+            required
+            class="pl-7 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+          >
+        </div>
+      </div> -->
+      
+      <div class="flex items-center justify-between pt-4">
+        <button 
+          type="submit" 
+          class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+        >
+          Enregistrer
+        </button>
+        <a 
+          routerLink="/produits" 
+          class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+        >
+          Annuler
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,97 @@
+.detail-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.commande-number {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.section {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+h3 {
+  color: #3498db;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 10px;
+}
+
+.client-info, .produit-info, .logistique-info {
+  display: grid;
+  gap: 8px;
+}
+
+/* Styles des statuts */
+.statut-en_preparation {
+  color: #f39c12;
+  font-weight: bold;
+}
+
+.statut-en_cours {
+  color: #3498db;
+  font-weight: bold;
+}
+
+.statut-livree, .statut-livre {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.statut-retire {
+  color: #9b59b6;
+  font-weight: bold;
+}
+
+.payee {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.non-payee {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .commande-number {
+    margin-top: 5px;
+  }
+}

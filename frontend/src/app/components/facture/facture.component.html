@@ -1,0 +1,138 @@
+<div class="container mx-auto p-2" *ngIf="!isLoading; else loading">
+  <div class="flex justify-between items-center mb-2">
+    <button 
+          type="button" 
+          routerLink="/commandes" 
+          class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Retour
+    </button>
+    <button 
+      (click)="downloadPDF()"
+      [disabled]="commande.statutCommande !== 'LIVREE'"
+      [ngClass]="{
+        'bg-gray-300 hover:bg-gray-400 cursor-pointer': commande.statutCommande === 'LIVREE',
+        'bg-gray-200 text-gray-500 cursor-not-allowed': commande.statutCommande !== 'LIVREE'
+      }"
+      class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
+    >
+      <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+        <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/>
+      </svg>
+      <span>Télécharger </span>
+    </button>
+
+    
+  </div>
+  <div #pdfContent class="bg-white shadow-md rounded-lg p-16">
+    <!-- En-tête -->
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+      <h1 class="text-2xl font-bold">Ordre #{{commande.numeroCommande}}</h1>
+      <div class="text-right">
+        <p>Date: {{formatDate(commande.dateCreation)}}</p>
+        <p *ngIf="commande.dateLivraison">Livraison: {{formatDate(commande.dateLivraison)}}</p>
+      </div>
+    </div>
+
+    <!-- Informations client -->
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold mb-2">Client</h2>
+      <p>{{commande.client.name}}</p>
+      <p>Téléphone: {{commande.client.tel}}</p>
+      <p>Adresse: {{commande.client.address2}}</p>
+    </div>
+
+    <!-- Détails commande -->
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold mb-2">Détails de la Livraision</h2>
+      <table class="min-w-full">
+        <thead>
+          <tr class="border-b">
+            <th class="text-left py-2">Produit</th>
+            <!-- <th class="text-right py-2">Prix unitaire</th> -->
+             <th class="text-center py-2">Dépôt</th>
+            <th class="text-right py-2">Quantité</th>
+            <!-- <th class="text-right py-2">Total</th> -->
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b" *ngFor="let ligne of commande.lignesCommande">
+            <td class="py-2">{{ligne.produit.name}} </td>
+            <td class="py-2 text-center"> {{ligne.depot.name}}</td>
+            <!-- <td class="text-right py-2">{{ligne.produit.prix | currency:'EUR'}} </td> -->
+            <td class="text-right py-2">{{ligne.quantity}}</td>
+            <!-- <td class="text-right py-2">{{ligne.produit.prix * ligne.quantity | currency:'EUR'}}</td> -->
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+
+    <!-- Informations livraison -->
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold mb-2">Livraison</h2>
+      <div *ngIf="commande.retireSurPlace; else livraisonInfo">
+        <p>Mode: Retrait sur place</p>
+        <ul>
+          <li *ngFor="let ligne of commande.lignesCommande">
+            Produit "{{ligne.produit.name}}" depuis le dépôt "{{ligne.depot.name}}"
+          </li>
+        </ul>
+      </div>
+      <ng-template #livraisonInfo>
+        <p>Mode: Livraison</p>
+        <p *ngIf="commande.livreur">Livreur: {{commande.livreur.username}}</p>
+      </ng-template>
+    </div>
+
+    <!-- Statuts -->
+    <div class="flex justify-between items-center">
+      <div>
+        <p>Statut commande: 
+          <span [class]="'status-' + commande.statutCommande.toLowerCase()">
+            {{commande.statutCommande}}
+          </span>
+        </p>
+        <!-- <p>Statut produit: 
+          <span [class]="'status-' + commande.statutProduit.toLowerCase()">
+            {{commande.statutProduit}}
+          </span>
+        </p> -->
+      </div>
+      <div>
+        <p>Paiement : 
+          <span [class]="commande.payee ? 'text-green-600' : 'text-red-600'">
+            {{commande.payee ? 'Payé' : 'Payer à la livraison'}}
+          </span>
+        </p>
+      </div>
+    </div>
+    
+    <!-- Signature -->
+    <div class="mt-28">
+      <h2 class="text-xl font-semibold mb-2">Signature</h2>
+      <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <div>
+          <b class="mb-1">Signature du client :</b>
+          <p>Je soussigné(e) {{commande.client.name}}, certifie avoir reçu la commande ci-dessus.</p>
+          <p>Signature: ______________________</p>
+        </div>
+        <div *ngIf="commande.livreur">
+          <b class="mb-1">Signature du livreur :</b>
+          <p>Je soussigné(e) , certifie avoir livré la commande ci-dessus.</p>
+          <p>Signature: ______________________</p>
+        </div>
+      </div>
+    </div>
+  
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="text-center py-8">
+    <p>Chargement de la facture...</p>
+  </div>
+</ng-template>

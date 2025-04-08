@@ -1,0 +1,72 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="flex items-center justify-between px-4 py-5 sm:px-6">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900">Liste des utilisateurs</h2>
+      <div class="mt-4">
+        <input [(ngModel)]="searchQuery" (input)="searchUsers()" type="text" placeholder="Rechercher un utilisateur"
+               class="px-4 py-2 border rounded-md w-full sm:w-64">
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="px-4 py-3 bg-red-50">
+      <p class="text-sm text-red-600">{{ errorMessage }}</p>
+    </div>
+
+    <ul class="divide-y divide-gray-200">
+      <li *ngFor="let user of users" class="px-4 py-4 sm:px-6 hover:bg-gray-50 transition-colors duration-150 ease-in-out">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <!-- Avatar placeholder -->
+              <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <span class="text-gray-500 font-medium">{{ user.username.charAt(0).toUpperCase() }}</span>
+              </div>
+            </div>
+            <div class="ml-4">
+              <div class="text-sm font-medium text-gray-900">{{ user.username }}</div>
+            </div>
+          </div>
+          <div>
+            <span class="px-3 py-1 text-xs font-medium rounded-full" 
+                  [ngClass]="{
+                    'bg-blue-100 text-blue-800': user.role === 'LIVREUR',
+                    'bg-green-100 text-green-800': user.role === 'RESPONSABLE',
+                    'bg-purple-100 text-purple-800': user.role === 'COMERCIAL',
+                    'bg-red-100 text-red-800': user.role === 'ADMIN'
+                  }">
+              {{ user.role }}
+            </span>
+          </div>
+          <div class="flex items-center gap-4">
+            <select [(ngModel)]="user.role" (change)="updateUserRole(user.id!, user.role)"
+                    class="px-2 py-1 border rounded-md text-sm">
+              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+            </select>
+            <button (click)="deleteUser(user.id!)" class="text-red-600 hover:text-red-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Pagination -->
+    <div class="px-4 py-3 bg-gray-50 sm:px-6">
+      <nav class="flex justify-between">
+        <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 0"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">
+          Précédent
+        </button>
+        <span class="text-sm text-gray-700">
+          Page {{ currentPage + 1 }} sur {{ totalPages }}
+        </span>
+        <button (click)="onPageChange(currentPage + 1)" [disabled]="currentPage >= totalPages - 1"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">
+          Suivant
+        </button>
+      </nav>
+    </div>
+  </div>
+</div>

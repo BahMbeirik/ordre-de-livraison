@@ -1,0 +1,20 @@
+<div class=" bg-gray-100 flex flex-col items-center mt-52">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl p-9 text-center">
+    <p class="text-3xl md:text-3xl font-bold text-gray-800">
+      BIENVENUE SUR LA PLATFORM D'ORDRE DE LIVRESION 
+    </p>
+  
+    <button *ngIf="!logined"
+      routerLink="/login"
+      class="mt-6 px-7 py-3 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition duration-200"
+    >
+      Se connecter
+    </button>
+    <button *ngIf="logined"
+      routerLink="/login"
+      class="mt-6 px-7 py-3 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition duration-200"
+    >
+      Aller au accuel
+    </button>
+  </div>
+</div>

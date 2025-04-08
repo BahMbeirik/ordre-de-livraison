@@ -1,0 +1,183 @@
+<!-- commande-form.component.html -->
+<button 
+type="button" 
+routerLink="/commandes" 
+class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+>
+<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+</svg>
+Retour
+</button>
+<form [formGroup]="commandeForm" (ngSubmit)="onSubmit()" class="max-w-4xl mx-auto py-6 space-y-6">
+  <!-- Section Client et Livraison -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Client -->
+    <div>
+      <label for="clientId" class="block text-sm font-medium text-gray-700 mb-1">Client*</label>
+      <select 
+        id="clientId" 
+        formControlName="clientId" 
+        class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      >
+        <option [ngValue]="null">-- Sélectionnez un client --</option>
+        <option *ngFor="let client of clients" [ngValue]="client.id">
+          {{client.name}} - {{client.tel}}
+        </option>
+      </select>
+    </div>
+
+    <!-- Livreur -->
+    <div>
+      <label for="livreurId" class="block text-sm font-medium text-gray-700 mb-1">Livreur</label>
+      <select 
+        id="livreurId" 
+        formControlName="livreurId" 
+        [disabled]="commandeForm.get('retireSurPlace')?.value"
+        class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+      >
+        <option [ngValue]="null">-- Sélectionnez un livreur --</option>
+        <option *ngFor="let livreur of livreurs" [ngValue]="livreur.id">
+          {{livreur.username}}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Options de commande -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Payée -->
+    <div class="flex items-center">
+      <input 
+        type="checkbox" 
+        id="payee" 
+        formControlName="payee" 
+        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+      >
+      <label for="payee" class="ml-2 block text-sm text-gray-700">
+        Payée
+      </label>
+    </div>
+
+    <!-- Retiré sur place -->
+    <div class="flex items-center">
+      <input 
+        type="checkbox" 
+        id="retireSurPlace" 
+        formControlName="retireSurPlace" 
+        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+      >
+      <label for="retireSurPlace" class="ml-2 block text-sm text-gray-700">
+        Retiré sur place
+      </label>
+    </div>
+  </div>
+
+  <!-- Section Produits -->
+  <div class="border-t border-gray-200 pt-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Produits*</h3>
+
+    <!-- Liste des produits ajoutés -->
+    <div class="mb-6 bg-gray-50 p-4 rounded-md">
+      <h4 class="text-sm font-medium text-gray-700 mb-3">Produits dans la commande</h4>
+      
+      <div *ngIf="lignesCommande.length === 0" class="text-gray-500 italic text-sm">
+        Aucun produit ajouté à la commande
+      </div>
+
+      <div *ngFor="let ligne of lignesCommande; let i = index" 
+           class="flex justify-between items-center py-2 px-3 bg-white rounded-md shadow-sm mb-2">
+        <div class="text-sm">
+          <span class="font-medium">{{getProduitName(ligne.produitId)}}</span> - 
+          Quantité: {{ligne.quantity}} - 
+          Dépôt: {{getDepotName(ligne.depotId)}}
+        </div>
+        <button 
+          type="button" 
+          (click)="removeLigne(i)"
+          class="text-red-600 hover:text-red-800"
+          title="Supprimer"
+        >
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulaire pour ajouter un nouveau produit -->
+    <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+      <h4 class="text-sm font-medium text-gray-700 mb-3">Ajouter un produit</h4>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Produit -->
+        <div>
+          <label for="produitId" class="block text-sm font-medium text-gray-700 mb-1">Produit</label>
+          <select 
+            id="produitId" 
+            formControlName="produitId" 
+            class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          >
+            <option [ngValue]="null">-- Sélectionnez un produit --</option>
+            <option *ngFor="let produit of produits" [ngValue]="produit.id">
+              {{produit.name}} 
+            </option>
+          </select>
+        </div>
+
+        <!-- Quantité -->
+        <div>
+          <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantité</label>
+          <input 
+            type="number" 
+            id="quantity" 
+            formControlName="quantity" 
+            min="1"
+            class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          >
+        </div>
+
+        <!-- Dépôt -->
+        <div>
+          <label for="depotId" class="block text-sm font-medium text-gray-700 mb-1">Dépôt</label>
+          <select 
+            id="depotId" 
+            formControlName="depotId" 
+            class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          >
+            <option [ngValue]="null">-- Sélectionnez un dépôt --</option>
+            <option *ngFor="let depot of depots" [ngValue]="depot.id">
+              {{depot.name}}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button 
+          type="button" 
+          (click)="addLigneCommande()"
+          
+          [disabled]="!commandeForm.get('produitId')?.valid || !commandeForm.get('quantity')?.valid || !commandeForm.get('depotId')?.valid"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300"
+        >
+          <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          Ajouter le produit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bouton de soumission -->
+  <div class="pt-4 border-t border-gray-200">
+    <button 
+      type="submit" 
+      [disabled]=" lignesCommande.length === 0"
+      class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 disabled:cursor-not-allowed"
+    >
+      {{ isEditMode ? 'Mettre à jour la commande' : 'Créer la commande' }}
+    </button>
+  </div>
+</form>

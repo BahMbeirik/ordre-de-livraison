@@ -1,0 +1,174 @@
+<!-- commande-list.component.html -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div *ngIf="errorMessage" class="px-4 py-3 bg-red-50">
+    <p class="text-sm text-red-600">{{ errorMessage }}</p>
+  </div>
+  
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">{{canEdit() ? 'Ordre de Livraision' : 'Commandes'}}</h2>
+    
+    <a *ngIf="canEdit()" routerLink="/commandes/new" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+      <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      Nouvelle Ordre
+    </a>
+  </div>
+
+  <!-- Filtres -->
+  <div class="flex flex-col md:flex-row gap-4 mb-6">
+    <div class="md:w-1/2">
+      <div class="relative rounded-md shadow-sm">
+        <input type="text" class="block w-full rounded-md border-gray-300 pl-4 pr-10 py-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
+               placeholder="Rechercher..." 
+               [(ngModel)]="searchTerm" (input)="applyFilters()">
+        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+          <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="md:w-1/2">
+      <select class="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="all">Tous les statuts</option>
+        <option value="en_preparation">En préparation</option>
+        <option value="en_cours">En cours</option>
+        <option value="livree">Livrée</option>
+        <option value="retire">Retiré</option>
+        <option value="livre">Livré (produit)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Panneau de modification -->
+  <div *ngIf="selectedLigne" class="bg-white p-4 shadow-lg border-t border-gray-200 mb-4">
+    <div  class="max-w-7xl mx-auto flex justify-between items-center">
+      <div>
+        <h4 class="text-sm font-medium text-gray-500">Modification: {{selectedLigne.produit.name}} (x{{selectedLigne.quantity}})</h4>
+      </div>
+      
+      <div class="flex space-x-4">
+        <!-- Statut Produit -->
+        <div *ngIf="isResponsableSeul()" class="flex">
+          <label class="block text-sm mt-3 w-40 font-medium text-gray-700 ">Statut Produit : </label>
+          <select 
+            [(ngModel)]="selectedLigne.statutProduit"
+            (change)="updateProduitStatus(selectedLigne.statutProduit)"
+            class="block w-full rounded-md border border-gray-300  pl-3 pr-10 text-base focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          >
+            <option *ngIf="isResponsable()"  value="EN_PREPARATION">En Préparation</option>
+            <option value="RETIRE">Retiré</option>
+            <option  value="LIVRE">Livré</option>
+          </select>
+        </div>
+
+        <button 
+          (click)="selectedLigne = null"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau des commandes -->
+  <div class="overflow-x-auto shadow-md rounded-lg">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-800">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">N° Commande</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Client</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Produits</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Statut Commande</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Payée</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Date</th>
+          <th *ngIf="!isLivreur()"  scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let commande of filteredCommandes" class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ commande.numeroCommande }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ commande.client.name }} ({{commande.client.tel}})</td>
+          <td class="px-6 py-4 text-sm text-gray-700">
+            <div *ngFor="let ligne of commande.lignesCommande" 
+                 class="py-1 border-b border-gray-100 last:border-0"
+                 [class.bg-blue-100]="selectedLigne?.id === ligne.id"
+                (click)="isResponsableSeul() && ligne.statutProduit != 'LIVRE'? selectLigne(ligne) : null">
+              <div class="flex justify-between">
+                <span>{{ ligne.produit.name }} (x{{ ligne.quantity }})</span>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ml-2"
+                      [ngClass]="getStatusColor(ligne.statutProduit)">
+                  {{ ligne.statutProduit }}
+                </span>
+              </div>
+              <div class="text-xs text-gray-500">Dépôt : {{ ligne.depot.name }}</div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                  [ngClass]="getStatusColor(commande.statutCommande)">
+              {{ commande.statutCommande }}
+            </span>
+            <!-- <div *ngIf="canEdit()" class="mt-1">
+              <select 
+                [(ngModel)]="commande.statutCommande"
+                (change)="updateCommandeStatus(commande.id!, commande.statutCommande)"
+                class="block w-full rounded-md border-gray-300 py-1 pl-2 pr-7 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="EN_PREPARATION">En Préparation</option>
+                <option value="EN_COURS">En Cours</option>
+                <option value="LIVREE">Livrée</option>
+              </select>
+            </div> -->
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span [ngClass]="commande.payee ? 'text-green-600' : 'text-red-600'">
+              <svg *ngIf="commande.payee" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <svg *ngIf="!commande.payee" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ commande.dateCreation | date:'dd/MM/yyyy' }}
+            <div *ngIf="canEdit()" class="mt-1">
+              <input type="date" [(ngModel)]="commande.dateCreation" class="block w-full rounded-md border-gray-300 py-1 pl-2 pr-7 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+          </td>
+          <td *ngIf="!isLivreur()"   class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button 
+                (click)="viewDetail(commande.id!)"
+                class="inline-flex items-center p-1.5 text-blue-600 hover:text-blue-800 rounded-md hover:bg-blue-50 transition duration-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+              </button>
+            
+            <a  [routerLink]="['/commandes/edit', commande.id]" class="inline-flex items-center p-1.5 text-amber-600 hover:text-amber-800 rounded-md hover:bg-amber-50 transition duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </a>
+            <button *ngIf="canEdit()" (click)="deleteCommande(commande.id!)" class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 rounded-md hover:bg-red-50 transition duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+            
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div *ngIf="filteredCommandes.length === 0" class="text-center py-4">
+    <p class="text-gray-500">Aucune commande trouvée.</p>
+  </div>
+</div>
