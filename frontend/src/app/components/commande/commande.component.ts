@@ -30,19 +30,38 @@ export class CommandeComponent implements OnInit {
   }
 
   loadCommandes(): void {
-    this.commandeService.getAllCommandes().subscribe({
+    const role = this.authService.getUserRole();
+  
+    const fetchCommandes$ =
+      role === 'RESPONSABLE'
+        ? this.commandeService.getCommandesForResponsable()
+        : role === 'LIVREUR'
+          ? this.commandeService.getCommandesForLivreur()
+          : this.commandeService.getAllCommandes();
+  
+    fetchCommandes$.subscribe({
       next: (commandes) => {
         this.commandes = commandes;
         this.filteredCommandes = [...commandes];
+
+        // 👇 تحقق من commandes غير مدفوعة فقط إذا كان LIVREUR
+        if (role === 'LIVREUR') {
+          const nonPayees = commandes.filter(cmd => !cmd.payee);
+          if (nonPayees.length > 0) {
+            nonPayees.forEach(cmd => {
+              this.showNotification(`Commande '${cmd.numeroCommande}' non payée !`);
+            });
+          }
+        }
       },
       error: (err) => {
         console.error('Erreur lors du chargement des commandes', err);
-        // Affichez un message à l'utilisateur si nécessaire
         this.errorMessage = 'Erreur lors du chargement des commandes, session expirée ou pas de connexion internet';
-        
       }
     });
   }
+  
+  
   
 
   selectLigne(ligne: LigneCommande): void {
@@ -134,4 +153,9 @@ export class CommandeComponent implements OnInit {
       default: return 'bg-gray-100 text-gray-800';
     }
   }
+
+  showNotification(message: string) {
+    window.alert(message); // تنبيه بسيط
+  }
+  
 }

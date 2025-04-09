@@ -27,20 +27,15 @@ export class CommandeService {
   }
 
   updateCommande(id: number, commande: CreateCommandeDto): Observable<any> {
+    console.log('Commande envoyée pour mise à jour:', commande);  // ← تأكد أن livreur.id موجود هنا
     return this.http.put(`${this.apiUrl}/${id}`, commande);
   }
+  
   
 
   deleteCommande(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
-
-  // updateStatutCommande(id: number, statut: 'EN_PREPARATION' | 'EN_COURS' | 'LIVREE'): Observable<Commande> {
-  //   return this.http.put<Commande>(`${this.apiUrl}/${id}/statut-commande`, {}, {
-  //     params: { statut }
-  //   });
-  // }
-  
 
   updateStatutProduit(commandeId: number, ligneCommandeId: number, statut: 'EN_PREPARATION' | 'RETIRE' | 'LIVRE'): Observable<LigneCommande> {
     return this.http.put<LigneCommande>(`${this.apiUrl}/${commandeId}/lignes/${ligneCommandeId}/statut-produit`, {}, {
@@ -48,6 +43,13 @@ export class CommandeService {
     });
   }
   
+  getCommandesForResponsable(): Observable<Commande[]> {
+    return this.http.get<Commande[]>(`${this.apiUrl}/responsable`);
+  }
+
+  getCommandesForLivreur(): Observable<Commande[]> {
+    return this.http.get<Commande[]>(`${this.apiUrl}/livreurCommandes`);
+  }
   
 
   updateLigneCommande(commandeId: number, ligneId: number, ligne: { quantity?: number, depotId?: number }): Observable<LigneCommande> {
@@ -58,7 +60,6 @@ export class CommandeService {
     return this.http.get<Depot>(`${this.apiUrl}/produit/${produitId}/depot`);
   }
   
-
   getAvailableLivreurs(): Observable<User[]> {
     return this.http.get<User[]>(`${this.apiUrl}/livreurs`);
   }

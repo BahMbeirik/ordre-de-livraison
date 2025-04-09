@@ -91,7 +91,7 @@
     <!-- Statuts -->
     <div class="flex justify-between items-center">
       <div>
-        <p>Statut commande: 
+        <p>Statut de Livraison : 
           <span [class]="'status-' + commande.statutCommande.toLowerCase()">
             {{commande.statutCommande}}
           </span>
@@ -117,12 +117,12 @@
       <div class="flex justify-between items-center mb-6 border-b pb-4">
         <div>
           <b class="mb-1">Signature du client :</b>
-          <p>Je soussigné(e) {{commande.client.name}}, certifie avoir reçu la commande ci-dessus.</p>
+          <p>Je soussigné(e) {{commande.client.name}}, certifie avoir reçu la livraison ci-dessus.</p>
           <p>Signature: ______________________</p>
         </div>
         <div *ngIf="commande.livreur">
           <b class="mb-1">Signature du livreur :</b>
-          <p>Je soussigné(e) , certifie avoir livré la commande ci-dessus.</p>
+          <p>Je soussigné(e) , certifie avoir livré l'ordre ci-dessus.</p>
           <p>Signature: ______________________</p>
         </div>
       </div>

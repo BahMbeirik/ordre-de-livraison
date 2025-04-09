@@ -9,8 +9,11 @@ import com.ordre.livresion.exception.ResourceNotFoundException;
 import com.ordre.livresion.models.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -177,4 +180,25 @@ public class CommandeService {
     public List<User> getAvailableLivreurs() {
         return userRepository.findByRole(Role.LIVREUR);
     }
+
+    @PreAuthorize("hasRole('RESPONSABLE')")
+    public List<Commande> getCommandesByResponsable(User responsable) {
+        // استرجاع كل الـ depots التي هو مسؤول عنها
+        List<Depot> depots = depotRepository.findByChef(responsable);
+        // استخراج الـ commandes التي تحتوي على au moins une ligne commande liée à produit dans ces dépôts
+        Set<Commande> commandes = new HashSet<>();
+        for (Depot depot : depots) {
+            List<LigneCommande> lignes = ligneCommandeRepository.findByDepot(depot);
+            for (LigneCommande ligne : lignes) {
+                commandes.add(ligne.getCommande());
+            }
+        }
+        return new ArrayList<>(commandes);
+    }
+
+    @PreAuthorize("hasRole('LIVREUR')")
+    public List<Commande> getCommandesByLivreur(User livreur) {
+        return commandeRepository.findByLivreur(livreur);
+    }
+
 }

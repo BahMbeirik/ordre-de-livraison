@@ -7,4 +7,6 @@ import com.ordre.livresion.models.*;
 public interface LigneCommandeRepository extends JpaRepository<LigneCommande, Long> {
   List<LigneCommande> findByCommande(Commande commande);
   List<LigneCommande> findByStatutProduit(StatutProduit statut);
+  List<LigneCommande> findByDepot(Depot depot);
+
 }

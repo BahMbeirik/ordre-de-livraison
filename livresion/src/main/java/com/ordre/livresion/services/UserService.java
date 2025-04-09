@@ -42,13 +42,7 @@ public class UserService {
       userRepository.save(user);
   }
 
-  // public void updateUserPassword(Long id, String newPassword) {
-  //     User user = userRepository.findById(id)
-  //             .orElseThrow(() -> new RuntimeException("User not found"));
-  //     user.setPassword(newPassword);
-  //     userRepository.save(user);
-  // }
-
+  
   public Page<User> getPaginatedUsers(int page, int size) {
     PageRequest pageable = PageRequest.of(page, size);
     return userRepository.findAll(pageable);

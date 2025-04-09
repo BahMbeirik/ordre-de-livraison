@@ -1,16 +1,20 @@
 package com.ordre.livresion.controllers;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import com.ordre.livresion.DTO.CreateCommandeDto;
+import com.ordre.livresion.DTO.UpdateCommandeDto;
 import com.ordre.livresion.exception.ResourceNotFoundException;
 import com.ordre.livresion.models.*;
 import com.ordre.livresion.repositories.ClientRepository;
+import com.ordre.livresion.repositories.CommandeRepository;
 import com.ordre.livresion.repositories.UserRepository;
 import com.ordre.livresion.services.CommandeService;
 
@@ -20,13 +24,16 @@ public class CommandeController {
     private final CommandeService commandeService;
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
+    private final CommandeRepository commandeRepository;
 
     public CommandeController(CommandeService commandeService, 
                             ClientRepository clientRepository,
+                            CommandeRepository commandeRepository,
                             UserRepository userRepository) {
         this.commandeService = commandeService;
         this.clientRepository = clientRepository;
         this.userRepository = userRepository;
+        this.commandeRepository = commandeRepository;
     }
 
 
@@ -68,9 +75,28 @@ public class CommandeController {
     }
 
     @PutMapping("/{id}")
-    public Commande updateCommande(@PathVariable Long id, @RequestBody Commande commandeDetails) {
-        return commandeService.updateCommande(id, commandeDetails);
+    public Commande updateCommande(@PathVariable Long id, @RequestBody UpdateCommandeDto dto) {
+        Commande commande = commandeService.getCommandeById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Commande non trouvée"));
+
+        commande.setPayee(dto.getPayee());
+        commande.setRetireSurPlace(dto.getRetireSurPlace());
+
+        if (!dto.getRetireSurPlace() && dto.getLivreurId() != null) {
+            User livreur = userRepository.findById(dto.getLivreurId())
+                .orElseThrow(() -> new ResourceNotFoundException("Livreur non trouvé"));
+            commande.setLivreur(livreur);
+        } else {
+            commande.setLivreur(null);
+        }
+
+        if (dto.getStatutCommande() != null) {
+            commande.setStatutCommande(dto.getStatutCommande());
+        }
+
+        return commandeRepository.save(commande);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCommande(@PathVariable Long id) {
@@ -104,4 +130,24 @@ public class CommandeController {
     public List<User> getAvailableLivreurs() {
         return commandeService.getAvailableLivreurs();
     }
+
+    @GetMapping("/responsable")
+    @PreAuthorize("hasRole('RESPONSABLE')")
+    public List<Commande> getCommandesForResponsable(Principal principal) {
+        User responsable = userRepository.findByUsername(principal.getName())
+            .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé"));
+
+        return commandeService.getCommandesByResponsable(responsable);
+    }
+
+    @GetMapping("/livreurCommandes")
+    @PreAuthorize("hasRole('LIVREUR')")
+    public List<Commande> getCommandesForLivreur(Principal principal) {
+        User livreur = userRepository.findByUsername(principal.getName())
+            .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé"));
+
+        return commandeService.getCommandesByLivreur(livreur);
+    }
+
+
 }
