@@ -27,6 +27,8 @@ import { CommandeFormComponent } from './components/commande-form/commande-form.
 import { CommandeComponent } from './components/commande/commande.component';
 import { FactureComponent } from './components/facture/facture.component';
 import { DatePipe } from '@angular/common';
+import { ToastrModule } from 'ngx-toastr';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LivreurNotificationComponent } from './components/livreur-notification/livreur-notification.component';
 
 @NgModule({
@@ -58,6 +60,8 @@ import { LivreurNotificationComponent } from './components/livreur-notification/
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
+    BrowserAnimationsModule,
+    ToastrModule.forRoot(),
     ReactiveFormsModule
   ],
   providers: [

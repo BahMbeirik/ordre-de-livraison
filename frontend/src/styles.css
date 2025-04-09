@@ -2,6 +2,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import 'node_modules/ngx-toastr/toastr';
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; padding-top: 55px;}
@@ -11,4 +12,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; padding-top
 
 .leaflet-default-icon-path {
   background-image: url(https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png);
+}
+
+.toast-container .ngx-toastr {
+  width: 450px; /* Définissez la largeur souhaitée */
+  background-color:goldenrod;
 }

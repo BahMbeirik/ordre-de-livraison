@@ -1,15 +1,16 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output,OnDestroy} from '@angular/core';
 import { Router } from '@angular/router';
 import { Commande, LigneCommande } from 'src/app/models/commande';
 import { AuthService } from 'src/app/services/auth.service';
 import { CommandeService } from 'src/app/services/commande.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-commande',
   templateUrl: './commande.component.html',
   styleUrls: ['./commande.component.css']
 })
-export class CommandeComponent implements OnInit {
+export class CommandeComponent implements OnInit , OnDestroy {
   commandes: Commande[] = [];
   filteredCommandes: Commande[] = [];
   currentUserRole: string = '';
@@ -18,15 +19,24 @@ export class CommandeComponent implements OnInit {
   selectedLigne: LigneCommande | null = null;
   errorMessage: string | null = null;
 
+  private intervalId: any;
+  nonPayees: Commande[] = [];
+
   constructor(
     private commandeService: CommandeService,
     private authService: AuthService,
-    private router: Router
+    private router: Router, private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
     this.loadCommandes();
     this.currentUserRole = this.authService.getUserRole();
+    
+    if (this.currentUserRole === 'LIVREUR') {
+      this.intervalId = setInterval(() => {
+        this.notifyNonPayees();
+      }, 20000); // 60000 مللي ثانية = 60 ثانية
+    }
   }
 
   loadCommandes(): void {
@@ -49,10 +59,11 @@ export class CommandeComponent implements OnInit {
           const nonPayees = commandes.filter(cmd => !cmd.payee);
           if (nonPayees.length > 0) {
             nonPayees.forEach(cmd => {
-              this.showNotification(`Commande '${cmd.numeroCommande}' non payée !`);
+              this.showNotification(`Ordre de référence '${cmd.numeroCommande}' non payée !`);
             });
           }
         }
+        this.nonPayees = this.commandes.filter(cmd => !cmd.payee);
       },
       error: (err) => {
         console.error('Erreur lors du chargement des commandes', err);
@@ -154,8 +165,20 @@ export class CommandeComponent implements OnInit {
     }
   }
 
-  showNotification(message: string) {
-    window.alert(message); // تنبيه بسيط
+  notifyNonPayees(): void {
+    this.nonPayees.forEach(cmd => {
+      this.showNotification(`Ordre de référence '${cmd.numeroCommande}' non payée !`);
+    });
+  }
+
+  showNotification(message: string): void {
+    this.toastr.warning(message, 'Ordre Non Payée');
+  }
+
+  ngOnDestroy(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
   }
   
 }
