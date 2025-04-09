@@ -1,10 +1,10 @@
 # Étape de construction
-FROM maven:3.8.2-jdk-11 AS build
+FROM maven:3.9.5-openjdk-21 AS build
 COPY . .
 RUN mvn clean package -DskipTests
 
 # Étape de création de l'image finale
-FROM openjdk:11-jdk-slim
-COPY --from=build /target/livresion-0.0.1-SNAPSHOT.jar.jar app.jar
+FROM openjdk:21-slim
+COPY --from=build /target/livresion-0.0.1-SNAPSHOT.jar livresion.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "livresion.jar"]
